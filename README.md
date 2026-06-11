@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/language-C-00599C?logo=c&logoColor=white" alt="Language: C">
+  <img src="https://img.shields.io/badge/language-C-A8B9CC?logo=c&logoColor=00599C" alt="Language: C">
   <img src="https://img.shields.io/badge/GUI-GTK%203.24-4A90D9?logo=gnome&logoColor=white" alt="GTK 3.24">
   <img src="https://img.shields.io/badge/platform-Linux-FCC624?logo=linux&logoColor=black" alt="Platform: Linux">
   <img src="https://img.shields.io/badge/build-make-427819?logo=gnu&logoColor=white" alt="Build: make">
