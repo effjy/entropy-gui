@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Password Toolkit
+Comment=Verify password entropy and generate secure passwords
+Exec=entropy
+Icon=entropy
+Terminal=false
+Categories=Utility;Security;
+StartupWMClass=entropy
