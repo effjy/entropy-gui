@@ -1,4 +1,4 @@
-<h1 align="center"><a href="https://github.com/effjy/entropy-gui/"><img src="titles/entropy-gui-edition-title.svg" height="44" alt="Entropy (GUI Edition)"></a></sub></h1>
+<h1 align="center"><a href="https://github.com/effjy/entropy-gui/"><img src="titles/entropy-gui-edition-title.svg" height="52" alt="Entropy (GUI Edition)"></a></sub></h1>
 
 <p align="center">
   The GUI version of Entropy — a sleek <strong>GTK3</strong> desktop app for analyzing password entropy and generating cryptographically secure passwords.
