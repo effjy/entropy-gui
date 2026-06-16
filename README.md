@@ -1,7 +1,7 @@
 <h1 align="center"><a href="https://github.com/effjy/entropy-gui/"><img src="titles/entropy-gui-edition-title.svg" height="44" alt="Entropy (GUI Edition)"></a></sub></h1>
 
 <p align="center">
-  The GUI version of Password Toolkit — a sleek <strong>GTK3</strong> desktop app for analyzing password entropy and generating cryptographically secure passwords.
+  The GUI version of Entropy — a sleek <strong>GTK3</strong> desktop app for analyzing password entropy and generating cryptographically secure passwords.
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
 
 ## 📖 Overview
 
-**Password Toolkit** is a small, fast GTK3 desktop application for **password
+**Entropy** is a small, fast GTK3 desktop application for **password
 security**. It analyzes the entropy of a password (theoretical vs. a realistic
 estimate) and generates strong passwords using a cryptographically secure random
 number generator.
@@ -37,7 +37,7 @@ number generator.
 ## 📸 Screenshot
 
 <p align="center">
-  <img src="screenshot.png" alt="Password Toolkit screenshot" width="560">
+  <img src="screenshot.png" alt="Entropy screenshot" width="560">
 </p>
 
 ---
@@ -115,7 +115,7 @@ This installs:
 | Desktop entry | `/usr/local/share/applications/entropy.desktop` |
 
 After installing you can launch it from your application menu as
-**Password Toolkit**, or from a terminal:
+**Entropy**, or from a terminal:
 
 ```bash
 entropy
