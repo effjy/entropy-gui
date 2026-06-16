@@ -31,6 +31,15 @@
 
 #define MAX_PW 256
 
+/* G_APPLICATION_DEFAULT_FLAGS was introduced in GLib 2.74, replacing the
+ * now-deprecated G_APPLICATION_FLAGS_NONE. Pick whichever the GLib in use
+ * supports so the app builds cleanly on both old and new toolchains. */
+#if GLIB_CHECK_VERSION(2, 74, 0)
+#  define ENTROPY_APP_FLAGS G_APPLICATION_DEFAULT_FLAGS
+#else
+#  define ENTROPY_APP_FLAGS G_APPLICATION_FLAGS_NONE
+#endif
+
 /* Path to the installed icon (overridden at build time via -DICON_PATH). */
 #ifndef ICON_PATH
 #define ICON_PATH "entropy.png"
@@ -50,6 +59,13 @@ static const char *DICT[] = {
     "happy", "ninja", "rocket", "tiger", "eagle", "ocean",
     NULL
 };
+
+/* Zero a buffer in a way the compiler won't optimize away, so sensitive
+ * material (passwords) doesn't linger in memory longer than necessary. */
+static void wipe(void *p, size_t n) {
+    volatile unsigned char *v = (volatile unsigned char *)p;
+    while (n--) *v++ = 0;
+}
 
 /* ===================== ENTROPY HELPERS ===================== */
 
@@ -200,6 +216,8 @@ static char *analyze_report(const char *pw, double *out_real) {
     if (real < 0) real = 0;
     if (out_real) *out_real = real;
 
+    wipe(norm, sizeof(norm));
+
     return g_strdup_printf(
         "--- Results ---\n"
         "Length              : %zu characters\n"
@@ -222,7 +240,10 @@ static char *analyze_report(const char *pw, double *out_real) {
 static const char *SET_LOWER  = "abcdefghijklmnopqrstuvwxyz";
 static const char *SET_UPPER  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static const char *SET_DIGIT  = "0123456789";
-static const char *SET_SYMBOL = "!@#$%^&*()-_=+[]{};:,.<>?/";
+/* All 32 ASCII printable punctuation characters, matching the +32 symbol
+ * pool credited in charset_size() so generated passwords' reported entropy
+ * is consistent with how they were actually produced. */
+static const char *SET_SYMBOL = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
 /* Fill buf with len cryptographically secure random bytes.
  * Returns 0 on success, -1 on failure. Handles short reads and EINTR. */
@@ -261,36 +282,51 @@ static int generate_password(int length, int use_lower, int use_upper,
     if (length > MAX_PW - 1) length = MAX_PW - 1;
     if (length <= 0) length = 1;
 
+    /* Collect the selected character sets. */
+    const char *sets[4];
+    int nsets = 0;
+    if (use_lower)  sets[nsets++] = SET_LOWER;
+    if (use_upper)  sets[nsets++] = SET_UPPER;
+    if (use_digit)  sets[nsets++] = SET_DIGIT;
+    if (use_symbol) sets[nsets++] = SET_SYMBOL;
+    if (nsets == 0) return -2;
+
     char pool[256];
     pool[0] = '\0';
-    if (use_lower)  strcat(pool, SET_LOWER);
-    if (use_upper)  strcat(pool, SET_UPPER);
-    if (use_digit)  strcat(pool, SET_DIGIT);
-    if (use_symbol) strcat(pool, SET_SYMBOL);
-
+    for (int i = 0; i < nsets; i++) strcat(pool, sets[i]);
     size_t pool_len = strlen(pool);
-    if (pool_len == 0) return -2;
 
-    int classes_selected = use_lower + use_upper + use_digit + use_symbol;
+    int rc = 0;
 
-    int attempts = 0;
-    do {
-        for (int i = 0; i < length; i++) {
-            int idx = secure_index(pool_len);
-            if (idx < 0) return -1;
-            out[i] = pool[idx];
-        }
-        out[length] = '\0';
+    /* When the length allows, guarantee one character from each selected
+     * class by placing them first; fill the rest from the full pool. This
+     * removes the old retry-and-hope loop (which could silently return a
+     * password missing a class). */
+    int guaranteed = (length >= nsets) ? nsets : 0;
+    for (int i = 0; i < guaranteed; i++) {
+        size_t sl = strlen(sets[i]);
+        int idx = secure_index(sl);
+        if (idx < 0) { rc = -1; goto done; }
+        out[i] = sets[i][idx];
+    }
+    for (int i = guaranteed; i < length; i++) {
+        int idx = secure_index(pool_len);
+        if (idx < 0) { rc = -1; goto done; }
+        out[i] = pool[idx];
+    }
+    out[length] = '\0';
 
-        int ok = 1;
-        if (use_lower  && !strpbrk(out, SET_LOWER))  ok = 0;
-        if (use_upper  && !strpbrk(out, SET_UPPER))  ok = 0;
-        if (use_digit  && !strpbrk(out, SET_DIGIT))  ok = 0;
-        if (use_symbol && !strpbrk(out, SET_SYMBOL)) ok = 0;
-        if (ok || length < classes_selected) break;
-    } while (++attempts < 1000);
+    /* Fisher-Yates shuffle so the guaranteed characters aren't predictably
+     * at the front. Uses unbiased secure_index for each swap. */
+    for (int i = length - 1; i > 0; i--) {
+        int j = secure_index((size_t)(i + 1));
+        if (j < 0) { rc = -1; goto done; }
+        char t = out[i]; out[i] = out[j]; out[j] = t;
+    }
 
-    return 0;
+done:
+    wipe(pool, sizeof(pool));
+    return rc;
 }
 
 /* ===================== GUI ===================== */
@@ -477,6 +513,7 @@ static void on_generate_clicked(GtkButton *btn, gpointer data) {
     set_text_view(w->gen_result, report);
     update_strength(w->gen_bar, w->gen_verdict, real);
     g_free(report);
+    wipe(out, sizeof(out));
 }
 
 static void on_about_clicked(GtkButton *btn, gpointer data) {
@@ -768,7 +805,7 @@ int main(int argc, char **argv) {
     g_set_prgname("entropy");
 
     GtkApplication *app = gtk_application_new("org.toolkit.entropy",
-                                              G_APPLICATION_DEFAULT_FLAGS);
+                                              ENTROPY_APP_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
