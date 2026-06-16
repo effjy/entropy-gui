@@ -203,6 +203,25 @@ isn't unfairly driven to zero.
 
 ---
 
+## 🐛 Recent fixes
+
+- **Consistent symbol pool.** The generator's symbol set now contains all
+  **32** ASCII punctuation characters, matching the symbol pool size used by
+  the entropy analysis. Previously the generator used only 25 symbols, so
+  generated passwords' reported entropy was overstated.
+- **Guaranteed character classes.** Generation now places one character from
+  each selected class and shuffles the result (unbiased Fisher-Yates), instead
+  of a retry loop that could silently return a password missing a requested
+  class.
+- **Sensitive buffers wiped.** Internal copies of passwords (generation pool,
+  normalization buffer, generated output) are now zeroed after use so they
+  don't linger in memory.
+- **Broader GLib compatibility.** The application flag now adapts to the GLib
+  version (`G_APPLICATION_DEFAULT_FLAGS` on ≥ 2.74, `G_APPLICATION_FLAGS_NONE`
+  otherwise), so the app builds cleanly on both old and new toolchains.
+
+---
+
 ## 📄 License
 
 Provided as-is for personal and educational use.
