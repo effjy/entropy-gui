@@ -1,5 +1,5 @@
 /*
- * Password Toolkit (GTK3 GUI)
+ * Entropy (GTK3 GUI)
  * ---------------------------
  * Two tabs:
  *   1. Verify entropy    - naive vs. estimated "real" entropy
@@ -489,7 +489,7 @@ static void on_about_clicked(GtkButton *btn, gpointer data) {
     if (parent)
         gtk_window_set_transient_for(GTK_WINDOW(dialog), parent);
 
-    gtk_about_dialog_set_program_name(about, "Password Toolkit");
+    gtk_about_dialog_set_program_name(about, "Entropy");
     gtk_about_dialog_set_version(about, "1.0");
     gtk_about_dialog_set_comments(about,
         "A GTK3 toolkit for password security.\n\n"
@@ -702,13 +702,13 @@ static void activate(GtkApplication *app, gpointer user_data) {
     AppWidgets *w = g_new0(AppWidgets, 1);
 
     GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "Password Toolkit");
+    gtk_window_set_title(GTK_WINDOW(window), "Entropy");
     gtk_window_set_default_size(GTK_WINDOW(window), 520, 480);
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
     /* Header bar with an About button. */
     GtkWidget *header = gtk_header_bar_new();
-    gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Password Toolkit");
+    gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Entropy");
     gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
     GtkWidget *about_btn = gtk_button_new_with_label("About");
     g_signal_connect(about_btn, "clicked", G_CALLBACK(on_about_clicked), NULL);
@@ -735,7 +735,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     }
     GtkWidget *titles = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_valign(titles, GTK_ALIGN_CENTER);
-    GtkWidget *t1 = gtk_label_new("Password Toolkit");
+    GtkWidget *t1 = gtk_label_new("Entropy");
     gtk_widget_set_halign(t1, GTK_ALIGN_START);
     add_class(t1, "hero-title");
     GtkWidget *t2 = gtk_label_new("ENTROPY ANALYSIS \xC2\xB7 SECURE GENERATION");

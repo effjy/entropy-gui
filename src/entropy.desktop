@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Password Toolkit
+Name=Entropy
 Comment=Verify password entropy and generate secure passwords
 Exec=entropy
 Icon=entropy

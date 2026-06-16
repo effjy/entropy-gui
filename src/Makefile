@@ -36,7 +36,7 @@ install: $(TARGET)
 	install -m 0644 entropy.desktop $(DESTDIR)$(APPDIR)/entropy.desktop
 	-gtk-update-icon-cache -q -t -f $(DATADIR)/icons/hicolor 2>/dev/null || true
 	-update-desktop-database -q $(APPDIR) 2>/dev/null || true
-	@echo "Installed $(TARGET) to $(BINDIR). Run 'entropy' or launch 'Password Toolkit'."
+	@echo "Installed $(TARGET) to $(BINDIR). Run 'entropy' or launch 'Entropy'."
 
 # Requires root: sudo make uninstall
 uninstall:
